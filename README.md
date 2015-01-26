@@ -1,2 +1,2 @@
 # snowstorm
-Increase what you test in rails and decrease the time it takes
+Enjoy faster specs in dev and spec things you previously couldn't. 
