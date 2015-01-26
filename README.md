@@ -1,2 +1,2 @@
 # snowstorm
-Enjoy faster specs in dev. spec things you couldn't. 
+Faster specs in dev. spec things you couldn't. 
