@@ -1,2 +1,2 @@
-# snowstorm
-Faster specs in dev. spec things you couldn't. 
+# spec_storm
+Faster specs in dev. spec more things. 
