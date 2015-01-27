@@ -1,2 +1,2 @@
-# spec_storm
+# specstorm
 Faster specs in dev. spec more things. 
