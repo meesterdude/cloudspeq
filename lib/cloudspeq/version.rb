@@ -1,3 +1,3 @@
-module Cloudspeq
-  VERSION = "0.0.1"
+class Cloudspeq
+  VERSION = "0.0.5"
 end

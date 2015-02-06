@@ -1,0 +1,96 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'escort'
+require 'cloudspeq'
+
+Escort::App.create do |app|
+  app.summary "Run your rails tests in the cloud for faster exectuion"
+  app.options do |opts|
+    opts.opt :provider, "provider to use", :short => '-p', :long => '--provider', :type => :string, default: 'digitalocean'
+    opts.opt :cfg, "config file path", :short => '-c', :long => '--config', :type => :string, default: 'cloudspeq.yml'
+  end
+
+
+  app.command :install, aliases: [:i] do |command|
+    command.summary "Install config file"
+    
+  end
+
+  app.command :server_install, aliases: [:si] do |command|
+    command.summary "Install self-destroy on the server. must be run on server."
+    
+  end
+  
+  app.command :spool_up,  aliases: [:su] do |command|
+    command.summary "create machines to use for testing"
+    command.options do |opts|
+      opts.opt :count, "machine count to spool up", :short => '-c', :long => '--count', :type => :string
+    end
+    command.action do |options, arguments|
+      c = Cloudspeq.new(options[:global][:options][:cfg])
+      if options[:global][:commands][:spool_up][:options][:count_given]
+         c.spool_up options[:global][:commands][:spool_up][:options][:count]
+       else
+         c.spool_up
+       end
+    end
+  end
+  
+  app.command :spool_down, aliases: [:sd] do |command|
+    command.summary "destroy machines used for testing"
+     command.options do |opts|
+      opts.opt :count, "machine count to spool down", :short => '-c', :long => '--count', :type => :string
+    end
+     command.action do |options, arguments|
+       c = Cloudspeq.new(options[:global][:options][:cfg])
+       if options[:global][:commands][:spool_down][:options][:count_given]
+         c.spool_down options[:global][:commands][:spool_down][:options][:count]
+       else
+         c.spool_down
+       end
+    end
+  end
+
+  app.command :spool_down_all, aliases: [:sda] do |command|
+    command.summary "destroy all machines on remote that are used for testing"
+    command.action do |options, arguments|
+       c = Cloudspeq.new(options[:global][:options][:cfg])
+       c.spool_down_all
+    end
+  end
+
+  app.command :status, aliases: [:s] do |command|
+    command.summary "statuses of machines"
+    command.action do |options, arguments|
+      c = Cloudspeq.new(options[:global][:options][:cfg])
+      pp c.status
+    end
+  end
+
+  app.command :prepare, aliases: [:p] do |command|
+    command.summary "Run certain commands after creation, before testing, such as starting spring"
+    command.action do |options, arguments|
+      c = Cloudspeq.new(options[:global][:options][:cfg])
+      pp c.prepare
+    end
+  end
+
+  app.command :clean_up, aliases: [:cu] do |command|
+    command.summary "commands to run after testing"
+    command.action do |options, arguments|
+      c = Cloudspeq.new(options[:global][:options][:cfg])
+      pp c.prepare
+    end
+  end
+
+  app.command :run, aliases: [:r] do |command|
+    command.summary "Distribute the tests and display the results"
+    command.action do |options, arguments|
+      c = Cloudspeq.new(options[:global][:options][:cfg])
+      binding.pry
+      Cloudspeq::RspecOutputter.perform c.run_tests
+    end
+
+  end
+
+end
