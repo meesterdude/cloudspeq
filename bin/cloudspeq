@@ -10,76 +10,162 @@ Escort::App.create do |app|
     opts.opt :cfg, "config file path", :short => '-c', :long => '--config', :type => :string, default: 'cloudspeq.yml'
   end
 
-
+  
   app.command :install, aliases: [:i] do |command|
     command.summary "Install config file"
-    
-  end
-
-  app.command :server_install, aliases: [:si] do |command|
-    command.summary "Install self-destroy on the server. must be run on server."
+    command.action do |options, arguments|
+      Cloudspeq.install
+    end
     
   end
   
-  app.command :spool_up,  aliases: [:su] do |command|
-    command.summary "create machines to use for testing"
-    command.options do |opts|
-      opts.opt :count, "machine count to spool up", :short => '-c', :long => '--count', :type => :string
+
+  app.command :machines, aliases: [:m] do |command|
+    command.summary "Wrapper for commands to create and manage machines"
+
+
+    command.command :create,  aliases: [:c] do |cmd|
+      cmd.summary "create machines to use for testing"
+      cmd.options do |opts|
+        opts.opt :count, "machine count to spool up"
+      end
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        !arguments.empty? ? c.spool_up(arguments.first) : c.spool_up
+      end
     end
-    command.action do |options, arguments|
-      c = Cloudspeq.new(options[:global][:options][:cfg])
-      if options[:global][:commands][:spool_up][:options][:count_given]
-         c.spool_up options[:global][:commands][:spool_up][:options][:count]
-       else
-         c.spool_up
-       end
+
+    command.command :status, aliases: [:s] do |cmd|
+      cmd.summary "statuses of machines"
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        pp c.status
+      end
     end
+
+    command.command :destroy, aliases: [:d] do |cmd|
+      cmd.summary "destroy machines used for testing defined in local file"
+      cmd.options do |opts|
+        opts.opt :count, "machine count to spool down"
+      end
+       cmd.action do |options, arguments|
+         c = Cloudspeq.new(options[:global][:options][:cfg])
+         !arguments.empty? ? c.spool_down(arguments.first) : c.spool_down
+      end
+    end
+
+    command.command :destroy_all, aliases: [:da] do |cmd|
+      cmd.summary "destroy all machines on remote that are used for testing"
+      cmd.action do |options, arguments|
+         c = Cloudspeq.new(options[:global][:options][:cfg])
+         c.spool_down_all
+      end
+    end
+
+    command.command :prepare, aliases: [:p] do |cmd|
+      cmd.summary "Run remote_prepare commands defined in config file across remote machines"
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        c.remote_prepare
+      end
+    end
+
+    command.command :clean_up, aliases: [:cu] do |cmd|
+      cmd.summary "Run remote_clean_up commands defined in config file across remote machines"
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        pp c.remote_clean_up
+      end
+    end
+
+    command.command :sync, aliases: [:sy] do |cmd|
+      cmd.summary "sync current directory with machines"
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        c.sync
+      end
+    end
+
+    command.command :execute, aliases: [:x] do |cmd|
+      cmd.summary "Execute a command across all machines"
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        result = c.execute arguments.first
+        result.each do |k,v|
+          puts "\n#{k}: #{v}"
+        end
+      end
+    end
+
+    command.command :root_execute, aliases: [:rx] do |cmd|
+      cmd.summary "Execute a command across all servers as root"
+      cmd.action do |options, arguments|
+        c = Cloudspeq.new(options[:global][:options][:cfg])
+        result = c.root_execute arguments.first
+        result.each do |k,v|
+          puts "\n#{k}: #{v}"
+        end
+      end
+    end
+
   end
-  
-  app.command :spool_down, aliases: [:sd] do |command|
-    command.summary "destroy machines used for testing"
-     command.options do |opts|
-      opts.opt :count, "machine count to spool down", :short => '-c', :long => '--count', :type => :string
+
+  app.command :ssh do |command|
+    command.summary "Wrapper for commands to backup, restore and reset the ssh known_hosts file"
+    command.command :backup, aliases: [:bu] do |cmd|
+      cmd.summary "backup the known_hosts file"
+      cmd.action do |options, arguments|
+        Cloudspeq.backup_ssh
+      end
     end
-     command.action do |options, arguments|
-       c = Cloudspeq.new(options[:global][:options][:cfg])
-       if options[:global][:commands][:spool_down][:options][:count_given]
-         c.spool_down options[:global][:commands][:spool_down][:options][:count]
-       else
-         c.spool_down
-       end
+    command.command :restore, aliases: [:rso] do |cmd|
+      cmd.summary "restore the known_hosts file, removing backup"
+      cmd.action do |options, arguments|
+        Cloudspeq.restore_ssh
+      end
+    end
+    command.command :reset, aliases: [:rse] do |cmd|
+      cmd.summary "restore the known_hosts file, keeping backup"
+      cmd.action do |options, arguments|
+        Cloudspeq.reset_ssh
+      end
     end
   end
 
-  app.command :spool_down_all, aliases: [:sda] do |command|
-    command.summary "destroy all machines on remote that are used for testing"
-    command.action do |options, arguments|
-       c = Cloudspeq.new(options[:global][:options][:cfg])
-       c.spool_down_all
-    end
-  end
-
-  app.command :status, aliases: [:s] do |command|
-    command.summary "statuses of machines"
+  app.command :self_destruct do |command|
+    command.summary "run on the server to destroy after X uptime in minutes (default 90 minutes)"
     command.action do |options, arguments|
       c = Cloudspeq.new(options[:global][:options][:cfg])
-      pp c.status
+      if !arguments.empty?
+       minutes =  arguments.first.to_f
+      else
+       minutes = c.settings['server_lifetime'].to_f
+      end
+      uptime = `cat /proc/uptime`.split(" ").first.to_f / 60
+      if uptime > minutes
+        name = `hostname`.strip
+        puts "*** Destroying this machine"
+        machine = c.provider.machines.find{|m| m.name == name}
+        machine.destroy if machine 
+      else
+        puts "not eligble for self destruct"
+      end
     end
   end
 
   app.command :prepare, aliases: [:p] do |command|
-    command.summary "Run certain commands after creation, before testing, such as starting spring"
+    command.summary "Locally run commands defined in local_prepare"
     command.action do |options, arguments|
       c = Cloudspeq.new(options[:global][:options][:cfg])
-      pp c.prepare
+      c.local_prepare
     end
   end
 
   app.command :clean_up, aliases: [:cu] do |command|
-    command.summary "commands to run after testing"
+    command.summary "Locally run commands defined in local_clean_up"
     command.action do |options, arguments|
       c = Cloudspeq.new(options[:global][:options][:cfg])
-      pp c.prepare
+      c.local_clean_up
     end
   end
 
@@ -87,10 +173,8 @@ Escort::App.create do |app|
     command.summary "Distribute the tests and display the results"
     command.action do |options, arguments|
       c = Cloudspeq.new(options[:global][:options][:cfg])
-      binding.pry
       Cloudspeq::RspecOutputter.perform c.run_tests
     end
-
   end
 
 end

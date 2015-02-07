@@ -21,6 +21,12 @@ class Cloudspeq
     @provider = provider.new(@settings)
   end
 
+  def self.install
+    File.open('cloudspeq.yml',"w") do |f|
+      f.write(DEFAULT_SETTINGS.to_yaml)
+    end
+  end
+
   def self.settings(path=nil)
     @settings ||= OpenStruct.new DEFAULT_SETTINGS.merge( YAML.load_file(path) )
   end
@@ -30,6 +36,7 @@ class Cloudspeq
   end
 
   def status
+    refresh
     provider.status
   end
 
@@ -37,21 +44,34 @@ class Cloudspeq
     @provider
   end
 
-  def spoolup(n=provider.provider_settings['machine_count'])
+  def spool_up(n=provider.provider_settings['machine_count'])
     provider.create n
   end
 
-  def prepare
+  def remote_prepare
     output = []
-    @settings['prepare'].each do |command|
+    @settings['remote_prepare'].each do |command|
      output << provider.exec(command)
     end
     output
   end
 
-  def clean_up
-    @settings['cleanup'].each do |command|
+  def remote_clean_up
+    @settings['remote_cleanup'].each do |command|
       provider.exec(command)
+    end
+  end
+
+  def local_prepare
+    output = []
+    @settings['local_prepare'].each do |command|
+     `#{command}`
+    end
+  end
+
+  def local_clean_up
+    @settings['local_clean_up'].each do |command|
+      `#{command}`
     end
   end
 
@@ -63,20 +83,32 @@ class Cloudspeq
     provider.spool_down_all
   end
 
+  def refresh
+    provider.refresh
+  end
+
   def sync
     provider.sync
   end
 
+  def execute(cmd)
+    provider.exec cmd
+  end
+
+  def root_execute(cmd)
+    provider.root_exec cmd
+  end
+
   # copies current ssh known_hosts to a backup
-  def backup_ssh
+  def self.backup_ssh
     `cp ~/.ssh/known_hosts ~/.ssh/known_hosts.backup`
   end
   # restores known_hosts file, destroying backup
-  def restore_ssh
+  def self.restore_ssh
     `mv ~/.ssh/known_hosts.backup ~/.ssh/known_hosts`
   end
   # restores known_hosts file, keeping backup
-  def reset_ssh
+  def self.reset_ssh
     `cp ~/.ssh/known_hosts.backup ~/.ssh/known_hosts`
   end
 

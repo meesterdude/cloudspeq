@@ -17,18 +17,19 @@ class Cloudspeq
 
 
     def self.perform(outputs)
+      puts "\n\n ***** Spec Report *****\n\n"
       @failures = []
       @outputs = outputs['outputs']
       output_summary_lines
-      collect_failures
       output_failures
+      puts "Total Time: #{outputs['time']}"
     end
 
     private
 
     def self.output_summary_lines
       @outputs.each do |o| 
-        puts "#{o['symbol']} - #{o['hostname']}: #{o['time'].to_s}  #{o['output']['summary_line'] rescue 'unexpected output'}" 
+        puts "#{o['symbol'] || '.'} - #{o['hostname']}: #{o['time'].to_s}  #{o['output']['summary_line'] rescue 'unexpected output'}" 
       end
     end
 
@@ -44,6 +45,7 @@ class Cloudspeq
     end
 
     def self.output_failures
+      collect_failures
       if !@failures.empty?
         puts "\n\nFailures:"
         @failures.each{|f| puts color(:red, f)}

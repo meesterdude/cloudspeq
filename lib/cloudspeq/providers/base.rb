@@ -6,9 +6,29 @@ class Cloudspeq
         @settings = settings
       end
       
-      def sync
+      def refresh
         @machines= remote_machines
         write_machines @machines
+      end
+
+      def machines
+      end
+
+
+      def sync
+        machines.each do |machine|
+          machine.sync(@settings)
+        end
+      end
+
+      def sync
+        threads = []
+        output = {}
+        machines.each do |m| 
+          threads << Thread.new{ output[m.name] = m.sync(@settings) }
+        end
+        threads.each(&:join)
+        output
       end
 
       # destroys machines and removes
@@ -20,9 +40,10 @@ class Cloudspeq
       end
 
       def exec(command,machs=machines)
-        threads, output = [],[]
+        threads = []
+        output = {}
         machs.each do |m| 
-          threads << Thread.new{ output << m.exec(command,@settings) }
+          threads << Thread.new{ output[m.name] = m.exec(command,@settings) }
         end
         threads.each(&:join)
         output
@@ -48,8 +69,7 @@ class Cloudspeq
         end
       end
       
-      def self.destroy(count)
-      end
+
 
         private
 
@@ -107,6 +127,16 @@ class Cloudspeq
         # exec as root
         def root_exec(command)
           command_exec('root',attributes.ip_address,"",command)
+        end
+
+        def sync(settings)
+          command = 'rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -x " '
+          command += "--exclude='.git/' --exclude='log/' --exclude='tmp/' "
+          settings.sync_excludes.each do |exc|
+            command += "--include='#{exc}' "
+          end
+          command += ". #{settings.user}@#{attributes.ip_address}:#{settings.remote_project_directory}"
+          `#{command}`
         end
 
         private

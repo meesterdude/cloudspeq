@@ -1,11 +1,30 @@
-DEFAULT_SETTINGS = {
-  'provider_key' => :digital_ocean,
-  'spec_path' => 'spec',
-  'file_pattern' => '_spec.rb(:\d+)?\z',
-  'spec_line_pattern' => '/^(\s)+it|scenario/',
-  'server_threads' => 1,
-  'load_balance' => true,
-  'digital_ocean' => {
-    'machine_file' => 'cloudspeq_machines.yml'
-  }
+DEFAULT_SETTINGS = 
+{'provider_key'=>:digital_ocean,
+ 'spec_path'=>"spec",
+ 'user'=>"tester",
+ 'project_name'=>"myapp",
+ 'digital_ocean'=>
+  {"client_id"=>"xxx",
+   "api_key"=>"xxx",
+   "image_name"=>"xxx",
+   "ssh_key_name"=>"xxx",
+   "size_slug"=>"512mb",
+   "region_slug"=>"nyc2",
+   "machine_count"=>5,
+   },
+ 'machine_prefix'=>"test",
+ 'server_threads' => 1,
+ 'load_balance' => true,
+ 'server_lifetime' => 90,
+ 'file_pattern' => '/_spec.rb(:\d+)?\z/',
+ 'spec_line_pattern' => '/^(\s)+it|scenario/',
+ 'machine_file'=>"cloudspeq_machines.yml",
+ 'remote_command_prefix'=>"source .profile;",
+ 'remote_project_directory'=>"/home/tester/project",
+ 'remote_prepare'=>["bundle exec bin/rspec spec/spec_helper.rb"],
+ 'remote_clean_up'=>[],
+ 'local_clean_up' => [],
+ 'local_prepare' => [],
+ 'sync_excludes'=>["doc"]
 }
+
