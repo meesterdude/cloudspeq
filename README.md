@@ -11,7 +11,7 @@ To address this, cloudspeq throws computing power at it.
 ### Benefits
 
  - Plug and play: works with any rails codebase without app configuration
- - Fast: I've gotten a 5 minute test suit down to 22 seconds. It can be as fast as your slowest spec takes
+ - Fast: Can make a 5 minute test suit run in 20 seconds
  - Scalable: Can work with 10 machines, or 100. 
  - Controlable: You control what kind of machines to use, how many, and for how long. You also control which provider to use (so long as its digital ocean)
  - Load Balanced: specs are parsed for definitions and randomly distributed across machines to reduce testing hotspots
