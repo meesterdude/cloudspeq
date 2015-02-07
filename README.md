@@ -66,7 +66,7 @@ Things you'll need to do:
   2. Sync local directory to remote project directory (you can run `cloudspeq machines sync`). configure `sync_excludes` in the config file to skip any directories not needed for test; it already skips `.git/` and `tmp/`.
   3. Ensure test suite runs on remote machine
   4. Install ssh keys for root & user on remote machine
-  5. Optionally, you can have the machines self-destruct after a certain ammount of uptime. This is a great way to ensure machines don't accidently linger for longer than they need to, in case you forget to delete the machines after testing. It also means if you want more time, you can just reboot. For this to work it requires cloudspeq be installed on the machine, and that it have access to the cloudspeq.yml file. Then you just need to define a cron entry for it. For example:
+  5. Optionally, you can have the machines self-destruct after a certain ammount of uptime. This is a great way to ensure machines don't accidently linger for longer than they need to, in case you forget to delete the machines after testing. It also means if you want more time, you can just reboot. For this to work it requires cloudspeq be installed on the machine, and that it have access to the `cloudspeq.yml` file. Then you just need to define a cron entry for it. For example:
 
   ```
   */2 * * * * cd /home/tester/project/; /usr/local/bin/cloudspeq self_destruct
@@ -74,7 +74,7 @@ Things you'll need to do:
 
   Adjust to match your enviroment, and be sure to test it works in cron before relying on it. By default, the `server_lifetime` is 90 (minutes), but you can change this in the `cloudspeq.yml` file, or specify the number of minutes by passing it as a parameter to the `self_destruct` command. 
   6. Shutdown the machine, and create a snapshot
-  7. In `cloudspeq.yml`, specify `image_name` using the name of the snapshot you just created.
+  7. In `cloudspeq.yml`, specify `image_name` using the name of the snapshot you just created under the provider
 
 
 
@@ -140,7 +140,7 @@ cloudspeq machines destroy
 
 This destroys the same number of machines defined in `machine_count`. You can also pass this command a number to specify how many machines to destroy. 
 
-The above only pulls from the local machines file. To destroy all machines on the provider that are test related:
+The above only pulls from the local machines file, and might not destroy all the machines. To destroy all machines on the provider that are test related:
 
 ```
 cloudspeq machines destroy_all
@@ -171,7 +171,7 @@ While Cloudspeq load-balancing can reduce hotspots, Some specs need to be pamper
 
 By defining a princess, you can dedicate machines to focus on something in particular, in order to reduce the overall time it takes for the test suite to execute. it can take some tinkering to identify an ideal configuation for your particular app. 
 
-By default, all specs are distributed and run under "misc", where misc has a machine pool equal to the number of machines defined. When you define a princess, machines are set aside from those available, and the specs that are sent to them are removed from misc. The 'misc' group is the catch-all, and you'll get an error if there is not at least 1 machine available for it.
+By default, all specs are distributed and run under a default princess "misc", where misc has a machine pool equal to the number of machines defined. When you define a princess, machines are set aside from those available, and the specs that are sent to them are removed from misc. The 'misc' group is the catch-all, and you'll get an error if there is not at least 1 machine available for it.
 
 The order matters, so its best to be specific at the top and general at the bottom. 
 
@@ -195,11 +195,26 @@ Each princess consists of:
     4. `threads` controls the number of SSH connections to make to each machine, by default just 1. Useful if your tests can run in paralell without interfering with each other in the database, and you want to drive the machine harder.
     5. `per` defines how many specs each thread should receive. by default it is number of specs / number of threads, but if you specify a lower number it will cause machines to come back after finishing and be available for additional specs to work on, instead of sitting idle after they've finished. 
 
-If you define a 'misc' princess as the very last definition, you can adjust these parameters as they apply to any specs that fall in the 'misc' group. This is also useful if you want to experiment with how long the specs take to run with a given  number of machines. 
+If you define a 'misc' princess (with 'misc' as the key) as the last definition, you can adjust these parameters as they apply to any specs that fall in the misc group. This is also useful if you want to experiment with how long the specs take to run with a given number of machines. 
 
 ### Spec Tuning
 
 To optimize your tests to run with cloudspeq, they should be fast. Load-balancing and Princesses can help a lot, but in the end you'll only be able to be as fast as your slowest spec. If you have a spec that checks 6 different things and takes 6 seconds to run, you can optimize it by breaking it up into different specs, so that load-balancing can distribute the load across multiple machines.
+
+## Roadmap
+
+Cloudspeq is just getting started! Coming eventually:
+
+- More providers (EC2, linode, raspberry-pi)
+- Test coverage
+- Better test profiling display
+- Machine profiling
+- Machine profiling test correlation
+- Automatic tuning & optimizing
+- Framework Atheism
+- Distributed Rails Load Testing
+
+Want to help realize one of these ideas, or have an idea of your own? Submit a PR! 
 
 ## Contributing
 
