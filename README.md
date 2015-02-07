@@ -63,13 +63,15 @@ It is highly recommend you create a machine image to reduce the time it takes to
 
 Things you'll need to do:
   1. Ensure user & project directory exist as defined in `cloudspeq.yml`
-  2. Sync local directory to remote project directory (you can run `cloudspeq machines sync`). configure `sync_excludes` in the config file to skip any directories not needed for test; it already skips `.git` and `tmp/`.
+  2. Sync local directory to remote project directory (you can run `cloudspeq machines sync`). configure `sync_excludes` in the config file to skip any directories not needed for test; it already skips `.git/` and `tmp/`.
   3. Ensure test suite runs on remote machine
   4. Install ssh keys for root & user on remote machine
   5. Optionally, you can have the machines self-destruct after a certain ammount of uptime. This is a great way to ensure machines don't accidently linger for longer than they need to, in case you forget to delete the machines after testing. It also means if you want more time, you can just reboot. For this to work it requires cloudspeq be installed on the machine, and that it have access to the cloudspeq.yml file. Then you just need to define a cron entry for it. For example:
+
   ```
   */2 * * * * cd /home/tester/project/; /usr/local/bin/cloudspeq self_destruct
   ```
+
   Adjust to match your enviroment, and be sure to test it works in cron before relying on it. By default, the `server_lifetime` is 90 (minutes), but you can change this in the `cloudspeq.yml` file, or specify the number of minutes by passing it as a parameter to the `self_destruct` command. 
   6. Shutdown the machine, and create a snapshot
   7. In `cloudspeq.yml`, specify `image_name` using the name of the snapshot you just created.
@@ -79,7 +81,7 @@ Things you'll need to do:
 ## Usage
 
 
-### Create some machines to test with. 
+### Create some machines to test with
 
  ```
  cloudspeq machines create
@@ -106,7 +108,7 @@ cloudspeq ssh backup
 
 ### Sync 
 
-Sync the project files to the machines (uses rsync)
+Sync the project files to the machines
 
 ```
 cloudspeq sync
@@ -144,6 +146,8 @@ The above only pulls from the local machines file. To destroy all machines on th
 cloudspeq machines destroy_all
 ```
 
+Machines not related to testing, such as production machines, are ignored. 
+
 ### Restore SSH
 
 ```
@@ -155,11 +159,11 @@ cloudspeq ssh restore
  - You can use the `machines execute` and `machines root_execute` to execute commands across the machines
  - To run commands locally for prepare: `cloudspeq prepare` and for cleanup: `cloudspeq clean_up`
 
-Most commands have a short-hand that is a few letters long. See `cloudspeq -h` for more info, or `cloudspeq command -h` for command help. 
+Most commands have a short-hand that is a few letters long. See `cloudspeq -h` for more info, or `cloudspeq command -h` for specific command related help. 
 
 ## Optimizations
 
-While cloudspeq can draatically speed things up out of the box, with some tuning you can get things running even faster. 
+While cloudspeq can dramtically speed things up out of the box, with some tuning you can get things running even faster. 
 
 ### Princesses
 
@@ -185,10 +189,10 @@ Each princess consists of:
    
   1. a directory, file, or line number to test; as the key
   2. a hash value containing
-    1. `servers` is to specify the number of servers to dedicate
+    1. `servers` is to specify the number of machines to dedicate
     2. `symbol` is the symbol to use in output when representing (optional - defaults to '.')
     3. `load_balance` is to control if spec files should be broken up or fed in whole; useful if a spec file has expensive setup, but otherwise load_balancing is faster.
-    4. `threads` controls the number of SSH connections to make to each server, by default just 1. Useful if your tests can run in paralell without interfering with each other in the database, and you want to drive the machine harder.
+    4. `threads` controls the number of SSH connections to make to each machine, by default just 1. Useful if your tests can run in paralell without interfering with each other in the database, and you want to drive the machine harder.
     5. `per` defines how many specs each thread should receive. by default it is number of specs / number of threads, but if you specify a lower number it will cause machines to come back after finishing and be available for additional specs to work on, instead of sitting idle after they've finished. 
 
 If you define a 'misc' princess as the very last definition, you can adjust these parameters as they apply to any specs that fall in the 'misc' group. This is also useful if you want to experiment with how long the specs take to run with a given  number of machines. 
@@ -204,3 +208,7 @@ To optimize your tests to run with cloudspeq, they should be fast. Load-balancin
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+## License
+
+MIT
