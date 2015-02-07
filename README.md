@@ -179,10 +179,10 @@ an example princesses definition looks like:
 
 ```
 princesses:
-  "controllers/search_controller_spec.rb":        {servers: 2, symbol: 'G'}
-  "controllers/store":                            {servers: 4, symbol: "S"}
-  "acceptance":                                   {servers: 2, symbol: 'A', per: 1}
-  "models":                                       {servers: 3, symbol: 'M', load_balance: false, threads: 2}
+  "controllers/search_controller_spec.rb":  {servers: 2, symbol: 'G'}
+  "controllers/store":                      {servers: 4, symbol: "S", threads: 2}
+  "acceptance":                             {servers: 2, symbol: 'A', per: 1}
+  "models":                                 {servers: 3, symbol: 'M', load_balance: false}
 ```
 
 Each princess consists of:
