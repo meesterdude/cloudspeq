@@ -12,7 +12,7 @@ class Cloudspeq
       @proccessed   = []
       @code_returns = []
       time = Benchmark.measure do
-        test_princesses
+        test_clusters
         test_remaining
         @threads.each(&:join) 
       end
@@ -23,9 +23,9 @@ class Cloudspeq
     private
 
 
-    def self.test_princesses
-      if @settings.princesses
-        specified_servers = @settings.princesses.reject{|k,v| k == 'misc'}
+    def self.test_clusters
+      if @settings.clusters
+        specified_servers = @settings.clusters.reject{|k,v| k == 'misc'}
         if specified_servers.empty?
           specified_servers = @machines.count
         else
@@ -35,7 +35,7 @@ class Cloudspeq
           puts "ERROR: not enough servers. #{@machines.count} available, but #{specified_servers} needed"
           return false
         end
-        @settings.princesses.each do |k,v|
+        @settings.clusters.each do |k,v|
           next if k == 'misc'
           specs = parse_specs(k,v) - @proccessed
           @proccessed.concat specs
@@ -46,8 +46,8 @@ class Cloudspeq
 
     def self.test_remaining
       remaining = parse_specs - @proccessed
-      if @settings.princesses && @settings.princesses['misc']
-        options = {'servers' => @machines.count, 'load_balance' => false, 'symbol' => '.'}.merge @settings.princesses['misc']
+      if @settings.clusters && @settings.clusters['misc']
+        options = {'servers' => @machines.count, 'load_balance' => false, 'symbol' => '.'}.merge @settings.clusters['misc']
       else
         options = {'servers' => @machines.count, 'load_balance' => false}
       end

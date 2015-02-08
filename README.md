@@ -15,7 +15,7 @@ To address this, cloudspeq throws computing power at it.
  - Scalable: Can work with 10 machines, or 100. 
  - Controlable: You control what kind of machines to use, how many, and for how long. You also control which provider to use (so long as its digital ocean)
  - Load Balanced: specs are parsed for definitions and randomly distributed across machines to reduce testing hotspots
- - Princesses: Some directories / files / specs need special attention. Set aside machines to focus specifically on them
+ - clusters: Some directories / files / specs need special attention. Set aside machines to focus specifically on them
  - Safe: Ignores other machines on the provider that do not relate to testing
  - More Safe: Machines can self-destruct to ensure you dont get charged for machines you're not using
 
@@ -165,27 +165,25 @@ Most commands have a short-hand that is a few letters long. See `cloudspeq -h` f
 
 While cloudspeq can dramtically speed things up out of the box, with some tuning you can get things running even faster. 
 
-### Princesses
+### Clusters
 
-While Cloudspeq load-balancing can reduce hotspots, Some specs need to be pampered to get the most out of them. These can be directories, files, or specific specs. 
+While Cloudspeq load-balancing can reduce hotspots, Sometimes you need to isolate the slow specs. By defining a cluster, you can dedicate machines to focus on something in particular, in order to reduce the overall time it takes for the test suite to execute. it can take some tinkering to identify an ideal configuation for your particular app. 
 
-By defining a princess, you can dedicate machines to focus on something in particular, in order to reduce the overall time it takes for the test suite to execute. it can take some tinkering to identify an ideal configuation for your particular app. 
-
-By default, all specs are distributed and run under a default princess "misc", where misc has a machine pool equal to the number of machines defined. When you define a princess, machines are set aside from those available, and the specs that are sent to them are removed from misc. The 'misc' group is the catch-all, and you'll get an error if there is not at least 1 machine available for it.
+By default, all specs are distributed and run under a default cluster "misc", where misc has a machine pool equal to the number of machines defined. When you define a cluster, machines are set aside from those available, and the specs that are sent to them are removed from misc. The 'misc' group is the catch-all, and you'll get an error if there is not at least 1 machine available for it.
 
 The order matters, so its best to be specific at the top and general at the bottom. 
 
-an example princesses definition looks like:
+an example clusters definition looks like:
 
 ```
-princesses:
+clusters:
   "controllers/search_controller_spec.rb":  {servers: 2, symbol: 'G'}
   "controllers/store":                      {servers: 4, symbol: "S", threads: 2}
   "acceptance":                             {servers: 2, symbol: 'A', per: 1}
   "models":                                 {servers: 3, symbol: 'M', load_balance: false}
 ```
 
-Each princess consists of:
+Each cluster consists of:
    
   1. a directory, file, or line number to test; as the key
   2. a hash value containing
@@ -195,11 +193,11 @@ Each princess consists of:
     4. `threads` controls the number of SSH connections to make to each machine, by default just 1. Useful if your tests can run in paralell without interfering with each other in the database, and you want to drive the machine harder.
     5. `per` defines how many specs each thread should receive. by default it is number of specs / number of threads, but if you specify a lower number it will cause machines to come back after finishing and be available for additional specs to work on, instead of sitting idle after they've finished. 
 
-If you define a 'misc' princess (with 'misc' as the key) as the last definition, you can adjust these parameters as they apply to any specs that fall in the misc group. This is also useful if you want to experiment with how long the specs take to run with a given number of machines. 
+If you define a 'misc' cluster (with 'misc' as the key) as the last definition, you can adjust these parameters as they apply to any specs that fall in the misc group. This is also useful if you want to experiment with how long the specs take to run with a given number of machines. 
 
 ### Spec Tuning
 
-To optimize your tests to run with cloudspeq, they should be fast. Load-balancing and Princesses can help a lot, but in the end you'll only be able to be as fast as your slowest spec. If you have a spec that checks 6 different things and takes 6 seconds to run, you can optimize it by breaking it up into different specs, so that load-balancing can distribute the load across multiple machines.
+To optimize your tests to run with cloudspeq, they should be fast. Load-balancing and clusters can help a lot, but in the end you'll only be able to be as fast as your slowest spec. If you have a spec that checks 6 different things and takes 6 seconds to run, you can optimize it by breaking it up into different specs, so that load-balancing can distribute the load across multiple machines.
 
 ## Roadmap
 
