@@ -167,7 +167,7 @@ While cloudspeq can dramtically speed things up out of the box, with some tuning
 
 ### Princesses
 
-While Cloudspeq load-balancing can reduce hotspots, Some specs need to be pampered to get the most out of them. These can be directories, files, or specific spec lines. 
+While Cloudspeq load-balancing can reduce hotspots, Some specs need to be pampered to get the most out of them. These can be directories, files, or specific specs. 
 
 By defining a princess, you can dedicate machines to focus on something in particular, in order to reduce the overall time it takes for the test suite to execute. it can take some tinkering to identify an ideal configuation for your particular app. 
 

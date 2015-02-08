@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Cloudspeq::VERSION
   spec.authors       = ["Russell Jennings"]
   spec.email         = ["violentpurr@gmail.com"]
-  spec.summary       = %q{Test your apps in the cloud}
+  spec.summary       = %q{Distribute your tests in the cloud for faster development in slow test suits}
   spec.description   = %q{Having a slow test suite sucks. But don't let a slow test suite slow you down! with cloudspeq you can distribute your tests and dramatically reduce the time it takes to test.}
   spec.homepage      = "https://github.com/meesterdude/cloudspeq"
   spec.license       = "MIT"

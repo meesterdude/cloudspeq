@@ -5,6 +5,8 @@ require 'cloudspeq'
 
 Escort::App.create do |app|
   app.summary "Run your rails tests in the cloud for faster exectuion"
+
+
   app.options do |opts|
     opts.opt :provider, "provider to use", :short => '-p', :long => '--provider', :type => :string, default: 'digitalocean'
     opts.opt :cfg, "config file path", :short => '-c', :long => '--config', :type => :string, default: 'cloudspeq.yml'
@@ -26,9 +28,7 @@ Escort::App.create do |app|
 
     command.command :create,  aliases: [:c] do |cmd|
       cmd.summary "create machines to use for testing"
-      cmd.options do |opts|
-        opts.opt :count, "machine count to spool up"
-      end
+      cmd.description "Optionally takes a number of machines to create"
       cmd.action do |options, arguments|
         c = Cloudspeq.new(options[:global][:options][:cfg])
         !arguments.empty? ? c.spool_up(arguments.first) : c.spool_up
@@ -45,9 +45,7 @@ Escort::App.create do |app|
 
     command.command :destroy, aliases: [:d] do |cmd|
       cmd.summary "destroy machines used for testing defined in local file"
-      cmd.options do |opts|
-        opts.opt :count, "machine count to spool down"
-      end
+      cmd.description "Optionally takes a number of machines to destroy"
        cmd.action do |options, arguments|
          c = Cloudspeq.new(options[:global][:options][:cfg])
          !arguments.empty? ? c.spool_down(arguments.first) : c.spool_down
@@ -88,6 +86,7 @@ Escort::App.create do |app|
 
     command.command :execute, aliases: [:x] do |cmd|
       cmd.summary "Execute a command across all machines"
+      cmd.description "Takes an argument as a command to execute"
       cmd.action do |options, arguments|
         c = Cloudspeq.new(options[:global][:options][:cfg])
         result = c.execute arguments.first
@@ -98,7 +97,8 @@ Escort::App.create do |app|
     end
 
     command.command :root_execute, aliases: [:rx] do |cmd|
-      cmd.summary "Execute a command across all servers as root"
+      cmd.summary "Execute a command across all machines as root"
+      cmd.description "Takes an argument as a command to execute"
       cmd.action do |options, arguments|
         c = Cloudspeq.new(options[:global][:options][:cfg])
         result = c.root_execute arguments.first
@@ -134,13 +134,10 @@ Escort::App.create do |app|
 
   app.command :self_destruct do |command|
     command.summary "run on the server to destroy after X uptime in minutes (default 90 minutes)"
+    command.description "Optional argument is minutes of uptime to destroy after, uses server_lifetime config option otherwise"
     command.action do |options, arguments|
       c = Cloudspeq.new(options[:global][:options][:cfg])
-      if !arguments.empty?
-       minutes =  arguments.first.to_f
-      else
-       minutes = c.settings['server_lifetime'].to_f
-      end
+      minutes = !arguments.empty? ? arguments.first.to_f : c.settings['server_lifetime'].to_f
       uptime = `cat /proc/uptime`.split(" ").first.to_f / 60
       if uptime > minutes
         name = `hostname`.strip
@@ -148,7 +145,7 @@ Escort::App.create do |app|
         machine = c.provider.machines.find{|m| m.name == name}
         machine.destroy if machine 
       else
-        puts "not eligble for self destruct"
+        puts "not ready for self destruct"
       end
     end
   end

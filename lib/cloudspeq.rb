@@ -1,6 +1,5 @@
 require 'ostruct'
 require 'yaml'
-require 'pry'
 require 'benchmark'
 require 'digitalocean'
 require_relative "cloudspeq/version"
