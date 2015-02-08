@@ -15,7 +15,7 @@ To address this, cloudspeq throws computing power at it.
  - Scalable: Can work with 10 machines, or 100. 
  - Controlable: You control what kind of machines to use, how many, and for how long. You also control which provider to use (so long as its digital ocean)
  - Load Balanced: specs are parsed for definitions and randomly distributed across machines to reduce testing hotspots
- - clusters: Some directories / files / specs need special attention. Set aside machines to focus specifically on them
+ - Clusters: Some directories / files / specs need special attention. Set aside machines to focus specifically on them
  - Safe: Ignores other machines on the provider that do not relate to testing
  - More Safe: Machines can self-destruct to ensure you dont get charged for machines you're not using
 
