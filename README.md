@@ -187,8 +187,8 @@ Each cluster consists of:
    
   1. a directory, file, or line number to test; as the key
   2. a hash value containing
-    1. `servers` is to specify the number of machines to dedicate
-    2. `symbol` is the symbol to use in output when representing (optional - defaults to '.')
+    1. `servers` is to specify the number of machines to dedicate (required)
+    2. `symbol` is the symbol to use in output when representing (defaults to '.')
     3. `load_balance` is to control if spec files should be broken up or fed in whole; useful if a spec file has expensive setup, but otherwise load_balancing is faster.
     4. `threads` controls the number of SSH connections to make to each machine, by default just 1. Useful if your tests can run in paralell without interfering with each other in the database, and you want to drive the machine harder.
     5. `per` defines how many specs each thread should receive. by default it is number of specs / number of threads, but if you specify a lower number it will cause machines to come back after finishing and be available for additional specs to work on, instead of sitting idle after they've finished. 
