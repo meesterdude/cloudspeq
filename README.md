@@ -111,7 +111,7 @@ cloudspeq ssh backup
 Sync the project files to the machines
 
 ```
-cloudspeq sync
+cloudspeq machines sync
 ```
 
 ### Prepare for testing
@@ -124,7 +124,7 @@ cloudspeq machines prepare
 
 ### Run tests
 
-Run the tests and get a report of the results. 
+Run the tests and get a report of the results. This will request a JSON formatted response from each machine, and parse each to gather failure and summary results. 
 
 ```
 cloudspeq run
