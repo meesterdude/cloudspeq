@@ -50,7 +50,7 @@ To install the require config file, execute:
 cloudspeq install
 ```
 
-The `cloudspeq.yml` file contains all the defaults that cloudspeq uses. You'll need to fill in the neccesary provider information. Everything but the provider info can be removed if you want to rely on the defaults; or you can customize them to suit your needs. 
+The `cloudspeq.yml` file (installed in current directory, assumes app root) contains all the defaults that cloudspeq uses. You'll need to fill in the neccesary provider information. Everything but the provider info can be removed if you want to rely on the defaults; or you can customize them to suit your needs. 
 
 ## Preperation
 
